@@ -43,6 +43,7 @@ target/
  
 # "temporary" build files
 target/
+build/
  
 # other
 *.iws
@@ -124,3 +125,4 @@ Icon
 .Trashes
 
 *.log
+ivy.xml

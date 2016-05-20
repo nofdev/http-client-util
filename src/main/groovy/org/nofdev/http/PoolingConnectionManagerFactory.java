@@ -80,7 +80,7 @@ public class PoolingConnectionManagerFactory {
         connectionManager.setMaxTotal(maxTotalConnection);
         connectionManager.setDefaultMaxPerRoute(maxPerRoute);
         //TODO 每次获取连接池管理器的时候才释放一次空闲连接远远不够
-        connectionManager.closeIdleConnections(idleConnTimeout, TimeUnit.SECONDS);
+        connectionManager.closeIdleConnections(idleConnTimeout, TimeUnit.MILLISECONDS);
 
         return connectionManager;
     }

@@ -9,6 +9,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -113,6 +114,44 @@ public class HttpClientUtil {
             logger.trace("Request params do not exit");
         }
         post.setEntity(new UrlEncodedFormEntity(pairList, Charset.forName("UTF-8")));
+
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            post.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        HttpResponse httpResponse = httpClient.execute(post);
+        logger.debug("The http response status code is {}", httpResponse.getStatusLine().getStatusCode());
+        HttpEntity httpEntity = httpResponse.getEntity();
+        String body = EntityUtils.toString(httpEntity);
+        int statusCode = httpResponse.getStatusLine().getStatusCode();
+        String contentType;
+        if (httpEntity.getContentType() == null) {
+            contentType = null;
+        } else {
+            contentType = httpEntity.getContentType().getValue();
+        }
+        logger.debug("response entity is " + body);
+
+        Map<String,String> responseHeaders = new HashMap<>();
+        for(Header header:httpResponse.getAllHeaders()){
+            responseHeaders.put(header.getName(),header.getValue());
+        }
+
+        post.releaseConnection();
+        return new HttpMessageWithHeader(statusCode, contentType, body, responseHeaders);
+    }
+
+    public HttpMessageWithHeader postWithText(String url, String params, Map<String, String> headers) throws IOException {
+        HttpPost post = new HttpPost(url);
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(defaultRequestConfig.getDefaultConnectionRequestTimeout())
+                .setConnectTimeout(defaultRequestConfig.getDefaultConnectionTimeout())
+                .setSocketTimeout(defaultRequestConfig.getDefaultSoTimeout())
+                .setExpectContinueEnabled(false)
+                .build();
+        post.setConfig(requestConfig);
+
+        post.setEntity(new StringEntity(params, Charset.forName("UTF-8")));
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             post.addHeader(entry.getKey(), entry.getValue());

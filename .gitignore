@@ -126,3 +126,7 @@ Icon
 
 *.log
 ivy.xml
+
+## hack for graddle wrapper
+!wrapper/*.jar
+!**/wrapper/*.jar

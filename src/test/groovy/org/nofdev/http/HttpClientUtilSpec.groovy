@@ -42,6 +42,34 @@ class HttpClientUtilSpec extends Specification {
         httpMessage.contentType == "text/html"
     }
 
+    def "postWithHeader请求测试"() {
+        setup:
+        mockServer.when(HttpRequest.request().withURL(url).withHeader(new Header("Accept", "application/json")).withHeader(new Header("Content-Type", "application/json")))
+                .respond(HttpResponse.response().withStatusCode(200).withHeader(new Header("Content-Type", "text/html")).withBody("hello world"))
+        def headers = new HashMap()
+        headers.put("Accept", "application/json")
+        headers.put("Content-Type", "application/json")
+        def httpMessage = new HttpClientUtil(new PoolingConnectionManagerFactory()).postWithHeader(url, [:], headers)
+        expect:
+        httpMessage.body == "hello world"
+        httpMessage.statusCode == 200
+        httpMessage.contentType == "text/html"
+    }
+
+    def "postWithText请求测试"() {
+        setup:
+        mockServer.when(HttpRequest.request().withURL(url).withHeader(new Header("Accept", "application/json")).withHeader(new Header("Content-Type", "application/json")))
+                .respond(HttpResponse.response().withStatusCode(200).withHeader(new Header("Content-Type", "application/json")).withBody("hello world"))
+        def headers = new HashMap()
+        headers.put("Accept", "application/json")
+        headers.put("Content-Type", "application/json")
+        def httpMessage = new HttpClientUtil(new PoolingConnectionManagerFactory()).postWithText(url, "hello world", headers)
+        expect:
+        httpMessage.body == "hello world"
+        httpMessage.statusCode == 200
+        httpMessage.contentType == "application/json"
+    }
+
     def "测试响应超时"() {
         setup:
         mockServer.when(HttpRequest.request().withURL(url)).respond(HttpResponse.response().withStatusCode(200).withBody("hello world").withDelay(new Delay(TimeUnit.SECONDS, 2)))
